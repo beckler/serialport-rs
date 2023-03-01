@@ -75,6 +75,7 @@ fn port_type(d: &libudev::Device) -> Result<SerialPortType> {
         Some("usb") => {
             let serial_number = udev_property_as_string(d, "ID_SERIAL_SHORT");
             Ok(SerialPortType::UsbPort(UsbPortInfo {
+                id: udev_property_as_string(d, "DEVPATH"),
                 vid: udev_hex_property_as_int(d, "ID_VENDOR_ID", &u16::from_str_radix)?,
                 pid: udev_hex_property_as_int(d, "ID_MODEL_ID", &u16::from_str_radix)?,
                 serial_number,
@@ -210,6 +211,7 @@ fn port_type(service: io_object_t) -> SerialPortType {
         .or_else(|| get_parent_device_by_type(service, legacy_usb_device_class_name));
     if let Some(usb_device) = maybe_usb_device {
         SerialPortType::UsbPort(UsbPortInfo {
+            id: get_string_property(usb_device, "sessionID"),
             vid: get_int_property(usb_device, "idVendor", kCFNumberSInt16Type).unwrap_or_default()
                 as u16,
             pid: get_int_property(usb_device, "idProduct", kCFNumberSInt16Type).unwrap_or_default()
