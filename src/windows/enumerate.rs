@@ -2,6 +2,8 @@ use std::ffi::{CStr, CString};
 use std::{mem, ptr};
 
 use regex::Regex;
+use winapi::shared::devpkey::*;
+use winapi::shared::devpropdef::DEVPROPKEY;
 use winapi::shared::guiddef::*;
 use winapi::shared::minwindef::*;
 use winapi::shared::winerror::*;
@@ -246,7 +248,7 @@ impl PortDevice {
 
     // Determines the port_type for this device, and if it's a USB port populate the various fields.
     pub fn port_type(&mut self) -> SerialPortType {
-        self.instance_id()
+        self.get_device_property(&DEVPKEY_Device_Parent)
             .and_then(|s| parse_usb_port_info(&s))
             .map(|mut info| {
                 info.manufacturer = self.property(SPDRP_MFG);
@@ -254,6 +256,34 @@ impl PortDevice {
                 SerialPortType::UsbPort(info)
             })
             .unwrap_or(SerialPortType::Unknown)
+    }
+
+    fn get_device_property(&mut self, property: &DEVPROPKEY) -> Option<String> {
+        let mut buffer: Vec<u16> = vec![0u16; MAX_PATH];
+        let mut output_type: u32 = 0u32;
+        let mut required_size: u32 = 0u32;
+        if unsafe {
+            SetupDiGetDevicePropertyW(
+                self.hdi,
+                &mut self.devinfo_data,
+                property,
+                &mut output_type,
+                buffer.as_mut_ptr() as PBYTE,
+                buffer.len() as DWORD,
+                &mut required_size,
+                0,
+            )
+        } < 1
+        {
+            return None;
+        };
+
+        // convert our buffer to a string
+        Some(
+            String::from_utf16_lossy(&buffer[0..required_size as usize])
+                .trim_end_matches(0 as char)
+                .to_string(),
+        )
     }
 
     // Retrieves a device property and returns it, if it exists. Returns None if the property
