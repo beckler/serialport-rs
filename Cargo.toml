@@ -33,7 +33,7 @@ regex = "1.5.5"
 [target."cfg(windows)".dependencies.winapi]
 version = "0.3.9"
 features = [
-    "cguid", "commapi", "errhandlingapi", "fileapi", "guiddef", "handleapi", "minwinbase",
+    "cguid", "commapi", "devpkey", "devpropdef", "errhandlingapi", "fileapi", "guiddef", "handleapi", "minwinbase",
     "minwindef", "ntdef", "setupapi", "winbase", "winerror", "winnt",
 ]
 
