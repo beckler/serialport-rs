@@ -103,7 +103,6 @@ fn parse_usb_port_info(hardware_id: &str) -> Option<UsbPortInfo> {
     let caps = re.captures(hardware_id)?;
 
     Some(UsbPortInfo {
-        id: Some(hardware_id.to_string()),
         vid: u16::from_str_radix(&caps[1], 16).ok()?,
         pid: u16::from_str_radix(&caps[2], 16).ok()?,
         serial_number: caps.name("serial").map(|m| m.as_str().to_string()),
