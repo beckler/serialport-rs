@@ -624,8 +624,6 @@ impl<T: SerialPort> SerialPort for &mut T {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UsbPortInfo {
-    /// Hardware ID
-    pub id: Option<String>,
     /// Vendor ID
     pub vid: u16,
     /// Product ID
